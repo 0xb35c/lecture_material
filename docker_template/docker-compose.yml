@@ -1,0 +1,37 @@
+version: '3'
+services:
+
+  # NGINX is used as webserver and reverse proxy to php-fpm (below)
+  nginx:
+    build: nginx/
+    volumes:
+      - code:/var/www/app # Depending on the configuration NGINX can serve static content
+    depends_on:
+      - app
+    expose:
+      - 80
+      - 443
+    ports:
+      - 80:80
+      - 443:443
+
+  # php-fpm for running PHP sites
+  app:
+    build: app/
+    depends_on:
+      - mysql
+    volumes:
+      - code:/var/www/app
+    expose:
+      - 9000
+
+  # mysql database
+  mysql:
+    build: db/
+    environment:
+         MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - /var/lib/mysql # A volume should be used to keep data between container (re)starts
+
+volumes:
+  code:

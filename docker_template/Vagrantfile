@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.synced_folder ".", "/vagrant"
+
+  config.vm.define "dev" do |dev|
+    dev.vm.network "private_network", ip: "192.168.56.10"
+    dev.vm.box = "envimation/ubuntu-xenial-docker"
+
+    # Setup docker deamon to listen on the internal network interface.
+    # Afterwards with "export DOCKER_HOST=192.168.56.10:2375" the machine can be set as docker host.
+    dev.vm.provision "shell", inline: <<-SHELL
+        sed -ir 's@ExecStart=.*@ExecStart=/usr/bin/dockerd -H fd:// -H tcp://192.168.56.10:2375@' /lib/systemd/system/docker.service
+        systemctl daemon-reload
+        systemctl restart docker.service
+    SHELL
+
+    dev.vm.provider "virtualbox" do |vb|
+      vb.memory = "2048"
+    end
+  end
+end
