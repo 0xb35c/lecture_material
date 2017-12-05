@@ -1,0 +1,25 @@
+version: '3'
+services:
+
+  nginx:
+    build: nginx/
+    depends_on:
+      - main_app
+    expose:
+      - 80
+      - 443
+    ports:
+      - 80:80
+      - 443:443
+
+  main_app:
+    build: main_app/
+    depends_on:
+      - mysql
+
+  mysql:
+    build: mysql_db
+    environment:
+         MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - /var/lib/mysql
